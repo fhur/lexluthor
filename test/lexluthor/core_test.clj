@@ -5,25 +5,25 @@
 
 (def calc-tokens
   (deftokens
-    [#"\A[0-9]+"    :DIGIT %]
-    [#"\A[a-zA-Z]+" :VAR %]
-    [#"\A[\+-\\*/]" :OP %]
-    [#"\A\s+"       :WS " "]))
+    [#"\A[0-9]+"    :DIGITS]
+    [#"\A[a-zA-Z]+" :VAR]
+    [#"\A[\+-\\*/]" :OP]
+    [#"\A\s+"       :WS :ignore]))
 
 (def java-tokens
   (deftokens
-    [#"\A\{" :OPEN-BRACKET %]
-    [#"\A\}" :CLOSE-BRACKET %]
-    [#"\A[0-9]+" :DIGITS %]
-    [#"\A=" :ASSIGN %]
+    [#"\A\{" :OPEN-BRACKET ]
+    [#"\A\}" :CLOSE-BRACKET ]
+    [#"\A[0-9]+" :DIGITS ]
+    [#"\A=" :ASSIGN ]
     [#"\A(int|float|long|char)" :PRIMITIVE (second %)]
-    [#"\Aclass" :CLASS %]
-    [#"\A[a-zA-Z]+" :IDENTIFIER %]
+    [#"\Aclass" :CLASS ]
+    [#"\A[a-zA-Z]+" :IDENTIFIER ]
     [#"\A\s+" :WHITESPACE :ignore]))
 
 (expected-when "calc-tokens should be a function that matches tokens" calc-tokens
- :when ["123 + 7"] = {:id :DIGIT :literal "123" :lexeme "123"}
- :when [" + 7"] = {:id :WS :literal " " :lexeme " "}
+ :when ["123 + 7"] = {:id :DIGITS :literal "123" :lexeme "123"}
+ :when [" + 7"] = {:id :WS :literal " " :lexeme :ignore}
  :when ["+ 7"] = {:id :OP :literal "+" :lexeme "+"})
 
 (expected-when "java-tokens should tokenize a tiny subset of the java lang" (comp :id java-tokens)
@@ -43,6 +43,11 @@
   :when ["{ float fuel = 10 }"] = [:OPEN-BRACKET :PRIMITIVE :IDENTIFIER :ASSIGN :DIGITS :CLOSE-BRACKET]
   :when ["int foo = class A {}"] = [:PRIMITIVE :IDENTIFIER :ASSIGN :CLASS :IDENTIFIER :OPEN-BRACKET :CLOSE-BRACKET])
 
+(expected-when "tokenize when applied to a calculator" #(map :lexeme (tokenize calc-tokens %))
+  :when ["5 * 5"] = ["5" "*" "5"]
+  :when ["5 * 7 + 3 / 2"] = ["5" "*" "7" "+" "3" "/" "2"]
+  :when ["5 + 12 + 47 + 123"] = ["5" "+" "12" "+" "47" "+" "123"]
+  :when [""] = [])
 
 
 
