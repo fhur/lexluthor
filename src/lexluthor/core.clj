@@ -52,9 +52,9 @@
     (if (empty? string)
       tokens
       (let [token (tokens-definition string)
-            {literal :literal lexeme :lexeme} token]
+            {literal :literal lexeme :lexeme id :id} token]
         (recur (.substring string (count literal))
-               (if (= :ignore lexeme)
+               (if (or (= :ignore lexeme) (= :ignore id))
                  tokens
                  (conj tokens token)))))))
 

@@ -19,7 +19,7 @@
     [#"\A(int|float|long|char)" :PRIMITIVE (second %)]
     [#"\Aclass" :CLASS ]
     [#"\A[a-zA-Z]+" :IDENTIFIER ]
-    [#"\A\s+" :WHITESPACE :ignore]))
+    [#"\A\s+" :ignore]))
 
 (expected-when "calc-tokens should be a function that matches tokens" calc-tokens
  :when ["123 + 7"] = {:id :DIGITS :literal "123" :lexeme "123"}
