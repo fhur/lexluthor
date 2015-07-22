@@ -7,22 +7,51 @@
     (let [[regex id lex-body] (first forms)]
       `(if-let [~'% (re-find ~regex ~string)]
         {:id ~id
-         :lexeme ~lex-body
+         :lexeme ~(if (nil? lex-body) '% lex-body)
          :literal (if (coll? ~'%) (first ~'%) ~'%)}
         (token-matcher ~string ~@(rest forms))))))
 
 (defmacro deftokens
+  "Token definition macro.
+  Syntax:
+  (deftokens
+    [regex1 id1 body1]
+    ...
+    [regexN idN bodyN])
+
+  Usage:
+  deftokens is used to define a set of tokens by mapping a regular
+  expression to a token. deftokens returns a function which takes a
+  string as input and attempts to match the string agains every
+  single regex until a match is found.
+  When the match is found the body will be evaled. If no body is supplied
+  then the lexeme will be the matched string. You can use :ignore as body
+  if you wish that token to be ignored by the `tokenize` function.
+
+  Example:
+  (deftokens
+    [#\"\\A\\{\" :OPEN-BRACKET ]
+    [#\"\\A\\}\" :CLOSE-BRACKET ]
+    [#\"\\A[0-9]+\" :DIGITS ]
+    [#\"\\A=\" :ASSIGN ]
+    [#\"\\A(int|float|long|char)\" :PRIMITIVE (second %)]
+    [#\"\\Aclass\" :CLASS ]
+    [#\"\\A[a-zA-Z]+\" :IDENTIFIER ]
+    [#\"\\A\\s+\" :WHITESPACE :ignore])"
   [& forms]
   `(fn [string#]
     (token-matcher string# ~@forms)))
 
 (defn tokenize
-  [tokenize-chunk string]
+  "Takes a token definition function (as created by deftokens) and a string
+  and returns a list of tokens by matching the whole string using a consecutive application
+  of the tokens-definition function."
+  [tokens-definition string]
   (loop [string string
          tokens []]
     (if (empty? string)
       tokens
-      (let [token (tokenize-chunk string)
+      (let [token (tokens-definition string)
             {literal :literal lexeme :lexeme} token]
         (recur (.substring string (count literal))
                (if (= :ignore lexeme)
