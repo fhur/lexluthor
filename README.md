@@ -39,6 +39,14 @@ user=> (tokenize calculator-tokens "123 + 7 * 2")
  {:lexeme "2", :id :DIGIT, :literal "2"}]
 ```
 
+### Error Handling
+If the there is a string that does not match to any token then an error
+object is returned. The error object has the following form:
+
+```clojure
+[:error "There was an error ..."]
+```
+
 ## License
 
 Copyright © 2015 Fernando Hurtado

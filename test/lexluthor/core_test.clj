@@ -49,7 +49,9 @@
   :when ["5 + 12 + 47 + 123"] = ["5" "+" "12" "+" "47" "+" "123"]
   :when [""] = [])
 
-
+(expected-when "tokenize an incorrect expression" #(first (tokenize calc-tokens %))
+  :when ["!=)"] = :error
+  :when ["&foo + bar"] = :error)
 
 
 

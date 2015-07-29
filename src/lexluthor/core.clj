@@ -53,8 +53,10 @@
       tokens
       (let [token (tokens-definition string)
             {literal :literal lexeme :lexeme id :id} token]
-        (recur (.substring string (count literal))
-               (if (or (= :ignore lexeme) (= :ignore id))
-                 tokens
-                 (conj tokens token)))))))
+        (if (nil? token)
+          [:error (str "Unexpected token at " string)]
+          (recur (.substring string (count literal))
+                 (if (or (= :ignore lexeme) (= :ignore id))
+                   tokens
+                   (conj tokens token))))))))
 

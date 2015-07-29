@@ -1,4 +1,4 @@
-(defproject lexluthor "0.2.0"
+(defproject lexluthor "0.3.0"
   :description "A simple lexical analysis engine"
   :url "http://github.com/fhur/lexluthor"
   :license {:name "Eclipse Public License"
