@@ -53,5 +53,14 @@
   :when ["!=)"] = :error
   :when ["&foo + bar"] = :error)
 
+(declare-is-fns :FOO :BAR :BAZ)
 
+(expected-when "define-is-fn expands to a function that matches tokens" is-foo
+  :when [{:id :FOO}] = true
+  :when [{:id :BAR}] = false
+  :when [nil] = false)
 
+(expected-when "is-[foo bar baz] should be defined" fn?
+  :when [is-foo] = true
+  :when [is-bar] = true
+  :when [is-baz] = true)

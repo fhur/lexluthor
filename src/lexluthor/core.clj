@@ -1,4 +1,5 @@
-(ns lexluthor.core)
+(ns lexluthor.core
+  (:require [clojure.string :refer [upper-case lower-case]]))
 
 (defmacro token-matcher
   [string & forms]
@@ -59,4 +60,29 @@
                  (if (or (= :ignore lexeme) (= :ignore id))
                    tokens
                    (conj tokens token))))))))
+
+(defmacro declare-is-fn
+  "Expands to a function which takes a token as input and returns true
+  if the token matches the given token id.
+  Example: (declare-is-fn :FOO)
+  Defines the is-foo function which works as follows:
+  user=> (is-foo {:id :FOO})
+  true
+  user=> (is-foo {:id :NOT-FOO})
+  false"
+  [token-id]
+  `(defn ~(symbol (str "is-" (lower-case (name token-id))))
+     [token#]
+     (= ~(->> (name token-id)
+              upper-case
+              keyword)
+        (:id token#))))
+
+(defmacro declare-is-fns
+  "Similar to declare-is-fn but declares several functions at the same
+  time (wrapped by a do block"
+  [& token-ids]
+  (cons `do
+        (for [token-id token-ids]
+          `(declare-is-fn ~token-id))))
 
