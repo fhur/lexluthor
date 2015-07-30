@@ -43,23 +43,38 @@
   `(fn [string#]
     (token-matcher string# ~@forms)))
 
+(defn- count-new-lines
+  [string]
+  (reduce (fn [new-lines c]
+            (if (= \newline c)
+              (inc new-lines)
+              new-lines))
+          0 string))
+
 (defn tokenize
   "Takes a token definition function (as created by deftokens) and a string
   and returns a list of tokens by matching the whole string using a consecutive application
   of the tokens-definition function."
   [tokens-definition string]
   (loop [string string
-         tokens []]
+         tokens []
+         line-num 0]
     (if (empty? string)
       tokens
-      (let [token (tokens-definition string)
+      (let [token-match (tokens-definition string)
+            token (assoc token-match :line line-num)
             {literal :literal lexeme :lexeme id :id} token]
-        (if (nil? token)
-          [:error (str "Unexpected token at " string)]
+        (if (nil? token-match)
+          {:error (str "Unexpected token '" string "' at line: " line-num)}
           (recur (.substring string (count literal))
                  (if (or (= :ignore lexeme) (= :ignore id))
                    tokens
-                   (conj tokens token))))))))
+                   (conj tokens token))
+                 (+ line-num (count-new-lines literal))))))))
+
+(defn is-error
+  [tokenization]
+  (string? (:error tokenization)))
 
 (defmacro declare-is-fn
   "Expands to a function which takes a token as input and returns true
